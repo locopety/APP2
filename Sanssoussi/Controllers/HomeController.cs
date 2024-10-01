@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text;
 using System.Threading.Tasks;
-
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.Sqlite;
@@ -15,6 +15,7 @@ using Sanssoussi.Models;
 
 namespace Sanssoussi.Controllers
 {
+    [Authorize]
     public class HomeController : Controller
     {
         private readonly SqliteConnection _dbConnection;
