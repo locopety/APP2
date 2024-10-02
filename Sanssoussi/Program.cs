@@ -12,6 +12,9 @@ namespace Sanssoussi
 
         public static IHostBuilder CreateHostBuilder(string[] args) =>
             Host.CreateDefaultBuilder(args)
-                .ConfigureWebHostDefaults(webBuilder => { webBuilder.UseStartup<Startup>(); });
+                .ConfigureWebHostDefaults(webBuilder => {
+                    webBuilder.UseStartup<Startup>()
+                          .UseUrls("https://localhost:5001", "http://localhost:5000");
+                });
     }
 }
