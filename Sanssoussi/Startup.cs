@@ -1,8 +1,12 @@
+using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.IdentityModel.Protocols.OpenIdConnect;
+using Microsoft.IdentityModel.Tokens;
 using System;
 
 namespace Sanssoussi
@@ -21,12 +25,42 @@ namespace Sanssoussi
         {
             services.AddRazorPages();
             services.AddControllersWithViews();
-            services.AddAuthentication()
-            .AddGoogle(options =>
+            services.AddAuthentication(options =>
             {
-                options.ClientId = Configuration["Authentication:Google:ClientId"];
-                options.ClientSecret = Configuration["Authentication:Google:ClientSecret"];
-            });
+                options.DefaultChallengeScheme = OpenIdConnectDefaults.AuthenticationScheme;
+            })
+            .AddOpenIdConnect(options =>
+             {
+                 // Set the Client ID and Client Secret obtained from Google API Console
+                 options.ClientId = Configuration["Authentication:Google:ClientId"];
+                 options.ClientSecret = Configuration["Authentication:Google:ClientSecret"];
+
+                 // Set the authority to Google's OIDC endpoint
+                 options.Authority = "https://accounts.google.com";
+                 options.ResponseType = OpenIdConnectResponseType.Code;
+
+                 // Add the scopes you want to request
+                 options.Scope.Add("openid");
+                 options.Scope.Add("profile");
+                 options.Scope.Add("email");
+
+                 // Configure the callback path
+                 options.CallbackPath = new PathString("/signin-oidc");
+
+                 // Save the tokens in the authentication session
+                 options.SaveTokens = true;
+                 options.GetClaimsFromUserInfoEndpoint = true;
+
+                 // Configure token validation parameters
+                 options.TokenValidationParameters = new TokenValidationParameters
+                 {
+                     ValidateIssuer = true,
+                     ValidIssuer = "https://accounts.google.com",
+                     ValidateAudience = true,
+                     ValidAudience = options.ClientId,
+                     ValidateLifetime = true
+                 };
+             });
 
             services.ConfigureApplicationCookie(options =>
             {

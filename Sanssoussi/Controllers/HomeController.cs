@@ -15,7 +15,6 @@ using Sanssoussi.Models;
 
 namespace Sanssoussi.Controllers
 {
-    [Authorize]
     public class HomeController : Controller
     {
         private readonly SqliteConnection _dbConnection;
