@@ -72,7 +72,7 @@ namespace Sanssoussi.Areas.Identity.Pages.Account
                                  this.Input.Email,
                                  this.Input.Password,
                                  this.Input.RememberMe,
-                                 lockoutOnFailure: false);
+                                 lockoutOnFailure: true);
                 if (result.Succeeded)
                 {
                     this._logger.LogInformation("User logged in.");
