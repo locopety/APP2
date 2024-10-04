@@ -31,9 +31,6 @@ namespace Sanssoussi.Areas.Identity
                         options.Password.RequireNonAlphanumeric = true;
                         options.Password.RequiredLength = 10;
                         options.SignIn.RequireConfirmedAccount = true;
-                        options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(5);
-                        options.Lockout.MaxFailedAccessAttempts = 5;
-                        options.Lockout.AllowedForNewUsers = true;
                     })
                     .AddEntityFrameworkStores<SanssoussiContext>();
                 });
