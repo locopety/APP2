@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Web;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -44,17 +46,21 @@ namespace Sanssoussi.Controllers
             var user = await this._userManager.GetUserAsync(this.User);
             if (user == null)
             {
+                this._logger.LogInformation("Unauthorized user attempted to get a comment");
+                Unauthorized(new { message = "Vous devez vous connecter" });
                 return this.View(comments);
             }
 
-            var cmd = new SqliteCommand($"Select Comment from Comments where UserId ='{user.Id}'", this._dbConnection);
+            var cmd = new SqliteCommand($"Select Comment from Comments where UserId = @UserId", this._dbConnection);
+            cmd.Parameters.AddWithValue("@UserId", user.Id);
             this._dbConnection.Open();
             var rd = await cmd.ExecuteReaderAsync();
 
             while (rd.Read())
             {
-                comments.Add(rd.GetString(0));
+                comments.Add(HttpUtility.HtmlEncode(rd.GetString(0)));
             }
+            //this._logger.LogInformation($"user {user.Id} display all his comments");
 
             rd.Close();
             this._dbConnection.Close();
@@ -68,14 +74,25 @@ namespace Sanssoussi.Controllers
             var user = await this._userManager.GetUserAsync(this.User);
             if (user == null)
             {
-                throw new InvalidOperationException("Vous devez vous connecter");
+                this._logger.LogInformation("Unauthorized user attempted to post a comment");
+                return Unauthorized(new { message = "Vous devez vous connecter" });
             }
 
+            // sanitize user input by encoding string to html
+            string sanitizedComment = HttpUtility.HtmlEncode(comment);
+
             var cmd = new SqliteCommand(
-                $"insert into Comments (UserId, CommentId, Comment) Values ('{user.Id}','{Guid.NewGuid()}','" + comment + "')",
+                $"insert into Comments (UserId, CommentId, Comment) Values (@UserId, @CommentId, @Comment)",
                 this._dbConnection);
+
+            cmd.Parameters.AddWithValue("@UserId", user.Id);
+            cmd.Parameters.AddWithValue("@CommentId", Guid.NewGuid().ToString());
+            cmd.Parameters.AddWithValue("@Comment", sanitizedComment);
+
             this._dbConnection.Open();
             await cmd.ExecuteNonQueryAsync();
+
+            this._logger.LogInformation($"user {user.Id} add new comment : {sanitizedComment}");
 
             return this.Ok("Commentaire ajouté");
         }
@@ -85,18 +102,31 @@ namespace Sanssoussi.Controllers
             var searchResults = new List<string>();
 
             var user = await this._userManager.GetUserAsync(this.User);
-            if (user == null || string.IsNullOrEmpty(searchData))
+            if (user == null)
+            {
+                this._logger.LogInformation("Unauthorized user attempted to search");
+                return this.View(searchResults);
+            }
+            if (string.IsNullOrEmpty(searchData))
             {
                 return this.View(searchResults);
             }
 
-            var cmd = new SqliteCommand($"Select Comment from Comments where UserId = '{user.Id}' and Comment like '%{searchData}%'", this._dbConnection);
+            string sanitizedsearchData = HttpUtility.HtmlEncode(searchData);
+
+            var cmd = new SqliteCommand($"Select Comment from Comments where UserId = @UserId and Comment like @searchData", this._dbConnection);
+
+            cmd.Parameters.AddWithValue("@UserId", user.Id);
+            cmd.Parameters.AddWithValue("@searchData", "%" + sanitizedsearchData + "%");
+
             this._dbConnection.Open();
             var rd = await cmd.ExecuteReaderAsync();
             while (rd.Read())
             {
-                searchResults.Add(rd.GetString(0));
+                searchResults.Add(HttpUtility.HtmlEncode(rd.GetString(0)));
             }
+
+            this._logger.LogInformation($"user {user.Id} search for comment : {searchData}");
 
             rd.Close();
             this._dbConnection.Close();
@@ -125,7 +155,7 @@ namespace Sanssoussi.Controllers
         {
             return this.View();
         }
-
+        /*
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<ActionResult> Emails(object form)
@@ -151,5 +181,6 @@ namespace Sanssoussi.Controllers
 
             return this.Json(searchResults);
         }
+        */
     }
 }
