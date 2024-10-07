@@ -60,7 +60,7 @@ namespace Sanssoussi.Controllers
             {
                 comments.Add(HttpUtility.HtmlEncode(rd.GetString(0)));
             }
-            //this._logger.LogInformation($"user {user.Id} display all his comments");
+            
 
             rd.Close();
             this._dbConnection.Close();
