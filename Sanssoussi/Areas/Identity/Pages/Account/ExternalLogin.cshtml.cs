@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System;
+using System.ComponentModel.DataAnnotations;
 using System.Security.Claims;
 using System.Text;
 using System.Text.Encodings.Web;
@@ -77,12 +78,12 @@ namespace Sanssoussi.Areas.Identity.Pages.Account
                 this.ErrorMessage = "Error loading external login information.";
                 return this.RedirectToPage("./Login", new { ReturnUrl = returnUrl });
             }
-
+            
             // Sign in the user with this external login provider if the user already has a login.
             var result = await this._signInManager.ExternalLoginSignInAsync(info.LoginProvider, info.ProviderKey, isPersistent: false, bypassTwoFactor: true);
             if (result.Succeeded)
             {
-                this._logger.LogInformation("{Name} logged in with {LoginProvider} provider.", info.Principal.Identity.Name, info.LoginProvider);
+                this._logger.LogInformation("{Datatime} - {Name} logged in with {LoginProvider} provider.",DateTime.Now, info.Principal.FindFirstValue(ClaimTypes.Email), info.LoginProvider);
                 return this.LocalRedirect(returnUrl);
             }
 

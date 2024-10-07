@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System;
+using System.ComponentModel.DataAnnotations;
 using System.Threading.Tasks;
 
 using Microsoft.AspNetCore.Identity;
@@ -76,7 +77,7 @@ namespace Sanssoussi.Areas.Identity.Pages.Account.Manage
             }
 
             await this._signInManager.RefreshSignInAsync(user);
-            this._logger.LogInformation("User changed their password successfully.");
+            this._logger.LogCritical($"{DateTime.Now} - User {user.Email} changed their password successfully.");
             this.StatusMessage = "Your password has been changed.";
 
             return this.RedirectToPage();

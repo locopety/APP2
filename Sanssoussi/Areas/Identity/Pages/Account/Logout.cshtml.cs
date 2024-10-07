@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -30,7 +31,7 @@ namespace Sanssoussi.Areas.Identity.Pages.Account
         public async Task<IActionResult> OnPost(string returnUrl = null)
         {
             await this._signInManager.SignOutAsync();
-            this._logger.LogInformation("User logged out.");
+            this._logger.LogInformation($"{DateTime.Now} - User {this.User.Identity.Name} logged out.");
             if (returnUrl != null)
             {
                 return this.LocalRedirect(returnUrl);

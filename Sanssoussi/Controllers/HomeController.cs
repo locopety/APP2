@@ -46,7 +46,7 @@ namespace Sanssoussi.Controllers
             var user = await this._userManager.GetUserAsync(this.User);
             if (user == null)
             {
-                this._logger.LogInformation("Unauthorized user attempted to get a comment");
+                this._logger.LogWarning($"{DateTime.Now} - Unauthorized user attempted to get a comment");
                 Unauthorized(new { message = "Vous devez vous connecter" });
                 return this.View(comments);
             }
@@ -74,7 +74,7 @@ namespace Sanssoussi.Controllers
             var user = await this._userManager.GetUserAsync(this.User);
             if (user == null)
             {
-                this._logger.LogInformation("Unauthorized user attempted to post a comment");
+                this._logger.LogWarning($"{DateTime.Now} - Unauthorized user attempted to post a comment");
                 return Unauthorized(new { message = "Vous devez vous connecter" });
             }
 
@@ -92,7 +92,7 @@ namespace Sanssoussi.Controllers
             this._dbConnection.Open();
             await cmd.ExecuteNonQueryAsync();
 
-            this._logger.LogInformation($"user {user.Id} add new comment : {sanitizedComment}");
+            this._logger.LogInformation($"{DateTime.Now} - user {user.Email} add new comment : {sanitizedComment}"); //ajouter le timestamp 
 
             return this.Ok("Commentaire ajouté");
         }
@@ -104,7 +104,7 @@ namespace Sanssoussi.Controllers
             var user = await this._userManager.GetUserAsync(this.User);
             if (user == null)
             {
-                this._logger.LogInformation("Unauthorized user attempted to search");
+                this._logger.LogWarning($"{DateTime.Now} - Unauthorized user attempted to search");
                 return this.View(searchResults);
             }
             if (string.IsNullOrEmpty(searchData))
@@ -126,7 +126,7 @@ namespace Sanssoussi.Controllers
                 searchResults.Add(HttpUtility.HtmlEncode(rd.GetString(0)));
             }
 
-            this._logger.LogInformation($"user {user.Id} search for comment : {searchData}");
+            this._logger.LogInformation($"{DateTime.Now} - user {user.Email} search for comment : {searchData}");
 
             rd.Close();
             this._dbConnection.Close();
@@ -150,12 +150,14 @@ namespace Sanssoussi.Controllers
             return this.View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? this.HttpContext.TraceIdentifier });
         }
 
+        //méthode non utilisé
+        /*
         [HttpGet]
         public IActionResult Emails()
         {
             return this.View();
         }
-        /*
+        
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<ActionResult> Emails(object form)

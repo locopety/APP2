@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System;
+using System.ComponentModel.DataAnnotations;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -7,8 +8,9 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.WebUtilities;
-
+using Microsoft.Extensions.Logging;
 using Sanssoussi.Areas.Identity.Data;
+using Sanssoussi.Controllers;
 
 namespace Sanssoussi.Areas.Identity.Pages.Account
 {
@@ -16,7 +18,7 @@ namespace Sanssoussi.Areas.Identity.Pages.Account
     public class ResetPasswordModel : PageModel
     {
         private readonly UserManager<SanssoussiUser> _userManager;
-
+        private readonly ILogger<SanssoussiUser> _logger;
         [BindProperty]
         public InputModel Input { get; set; }
 
@@ -49,6 +51,7 @@ namespace Sanssoussi.Areas.Identity.Pages.Account
             var user = await this._userManager.FindByEmailAsync(this.Input.Email);
             if (user == null)
             {
+                this._logger.LogCritical($"{DateTime.Now} - Unauthorize user try to reset the password");
                 // Don't reveal that the user does not exist
                 return this.RedirectToPage("./ResetPasswordConfirmation");
             }
@@ -56,6 +59,7 @@ namespace Sanssoussi.Areas.Identity.Pages.Account
             var result = await this._userManager.ResetPasswordAsync(user, this.Input.Code, this.Input.Password);
             if (result.Succeeded)
             {
+                this._logger.LogCritical($"{DateTime.Now} - User {user.Email} reset his password");
                 return this.RedirectToPage("./ResetPasswordConfirmation");
             }
 

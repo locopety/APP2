@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
@@ -73,7 +74,7 @@ namespace Sanssoussi.Areas.Identity.Pages.Account
                                  lockoutOnFailure: true);
                 if (result.Succeeded)
                 {
-                    this._logger.LogInformation("User logged in.");
+                    this._logger.LogInformation($"{DateTime.Now} - User {this.User.Identity.Name} logged in Succeeded."); // add timestamp, userID, si oui Success
                     return this.LocalRedirect(returnUrl);
                 }
 
@@ -84,11 +85,13 @@ namespace Sanssoussi.Areas.Identity.Pages.Account
 
                 if (result.IsLockedOut)
                 {
-                    this._logger.LogWarning("User account locked out.");
+                    this._logger.LogWarning($"{DateTime.Now} - User {this.User.Identity.Name} account locked out."); // add timestamp, userID, 
                     return this.RedirectToPage("./Lockout");
                 }
 
-                this.ModelState.AddModelError(string.Empty, "Invalid login attempt.");
+                this.ModelState.AddModelError(string.Empty, "Invalid login attempt."); // add timestamp,
+                this._logger.LogWarning($"{DateTime.Now} - login attempt failed");
+
                 return this.Page();
             }
 

@@ -1,18 +1,20 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System;
+using System.ComponentModel.DataAnnotations;
 using System.Threading.Tasks;
 
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-
+using Microsoft.Extensions.Logging;
 using Sanssoussi.Areas.Identity.Data;
+using Sanssoussi.Controllers;
 
 namespace Sanssoussi.Areas.Identity.Pages.Account.Manage
 {
     public class SetPasswordModel : PageModel
     {
         private readonly SignInManager<SanssoussiUser> _signInManager;
-
+        private readonly ILogger<SanssoussiUser> _logger;
         private readonly UserManager<SanssoussiUser> _userManager;
 
         [BindProperty]
@@ -73,7 +75,8 @@ namespace Sanssoussi.Areas.Identity.Pages.Account.Manage
 
             await this._signInManager.RefreshSignInAsync(user);
             this.StatusMessage = "Your password has been set.";
-
+            this._logger.LogInformation($"{DateTime.Now} - User {user.Email} Set his password");
+            
             return this.RedirectToPage();
         }
 
